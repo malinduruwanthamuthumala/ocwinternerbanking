@@ -8,6 +8,7 @@ public class OccwinternetbankingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(OccwinternetbankingApplication.class, args);
+		 
 	}
 
 }
