@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -28,13 +29,18 @@ public class ProjectSecurityConfig {
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher("/occwp/*"))
-				.permitAll().requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/myAccount"))
-				.authenticated().anyRequest().authenticated());
+		http.csrf().disable();
+		http.authorizeHttpRequests(auth -> auth
+				.requestMatchers(AntPathRequestMatcher.antMatcher("/occwp/*")).permitAll()
+				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/myAccount")).permitAll()
+				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration")).permitAll()
+				.anyRequest().authenticated());
 		http.formLogin(withDefaults());
 		http.httpBasic(withDefaults());
 		return http.build();
 	}
+	
+	//meka use krananna puluwan in memory users la hadanna ona  nam
 
 	/*
 	 * @Bean public InMemoryUserDetailsManager userDetailsService() {
@@ -57,9 +63,11 @@ public class ProjectSecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
+		return new BCryptPasswordEncoder();
 	}
 
+	
+	//cutom table ekak nathuwa already exciting user table ekata danna spring jdbc authentication eken meka default denwa
 	/*
 	 * @Bean UserDetailsManager users(DataSource dataSource) { return new
 	 * JdbcUserDetailsManager(dataSource); }
