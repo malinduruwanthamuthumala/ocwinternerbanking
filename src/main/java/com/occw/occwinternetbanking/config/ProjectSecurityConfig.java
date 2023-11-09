@@ -60,18 +60,15 @@ public class ProjectSecurityConfig {
 		return NoOpPasswordEncoder.getInstance();
 	}
 
+	/*
+	 * @Bean UserDetailsManager users(DataSource dataSource) { return new
+	 * JdbcUserDetailsManager(dataSource); }
+	 */
+
 	@Bean
-	UserDetailsManager users(DataSource dataSource) {
-		return new JdbcUserDetailsManager(dataSource);
+	@ConfigurationProperties("spring.datasource")
+	public DataSource dataSource() {
+		return DataSourceBuilder.create().build();
 	}
 
-
-	  @Bean
-	    @ConfigurationProperties("spring.datasource")
-	    public DataSource dataSource() {
-	        return DataSourceBuilder.create().build();
-	    }
-
-
-	
 }
