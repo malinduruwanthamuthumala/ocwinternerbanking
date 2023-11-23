@@ -1,5 +1,7 @@
 package com.occw.occwinternetbanking.jpa.components;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,10 +26,27 @@ public class Customer {
 
     @Column(name = "email", nullable = false)
     private String email;
+    
+    private List<Authority> authorities;
+    
 
-    public Customer() {
+    public List<Authority> getAuthorities() {
+		return authorities;
+	}
+
+
+
+	public void setAuthorities(List<Authority> authorities) {
+		this.authorities = authorities;
+	}
+
+
+
+	public Customer() {
     	
     }
+    
+    
 
     public Customer(String username, String password, String role, String email) {
         this.username = username;

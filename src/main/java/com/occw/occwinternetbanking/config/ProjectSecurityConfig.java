@@ -54,7 +54,8 @@ public class ProjectSecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
 		CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-		
+		http.securityContext().requireExplicitSave(false);
+		http.csrf().ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration"));
 		http.csrf((csrf) -> csrf
 			.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 		).addFilterAfter(new CsrfCookieFilter(),BasicAuthenticationFilter.class);
@@ -73,7 +74,7 @@ public class ProjectSecurityConfig {
 		});
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers(AntPathRequestMatcher.antMatcher("/occwp/*")).permitAll()
-				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/myAccount")).authenticated()
+				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/myAccount")).hasAuthority("VIEWACCOUNTS")
 				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration")).permitAll());
 		http.formLogin(withDefaults());
 		http.httpBasic(withDefaults());
