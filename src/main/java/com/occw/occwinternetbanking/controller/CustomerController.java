@@ -1,5 +1,6 @@
 package com.occw.occwinternetbanking.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,14 @@ public class CustomerController {
 		try {
 			String hashedPassword = passwordEncoder.encode(customer.getPassword());
 			customer.setPassword(hashedPassword);
+			List<Authority> authList = new ArrayList<>();
+			for(Authority a : customer.getAuthorities()) {
+				Authority a1 = new Authority();
+				a1.setName(a.getName());
+				a1.setCustomer(customer);
+				authList.add(a1);
+			}
+			customer.setAuthorities(authList);
 			Customer c = customerRepository.save(customer);
 			if (c.getId() != null) {
 				response = ResponseEntity.status(HttpStatus.CREATED)

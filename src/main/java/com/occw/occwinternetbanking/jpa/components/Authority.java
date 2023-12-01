@@ -1,5 +1,8 @@
 package com.occw.occwinternetbanking.jpa.components;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="authorities")
 public class Authority {
 	
 	
@@ -17,8 +19,8 @@ public class Authority {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	
-	@ManyToOne
+	@JsonIgnore
+	@ManyToOne(cascade= {CascadeType.PERSIST,CascadeType.REMOVE})
 	@JoinColumn(name="customer_id")
 	private Customer customer;
 

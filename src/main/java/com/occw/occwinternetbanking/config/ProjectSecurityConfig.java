@@ -2,6 +2,7 @@ package com.occw.occwinternetbanking.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import javax.sql.DataSource;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -34,6 +36,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import com.occw.occwinternetbanking.filter.CsrfCookieFilter;
+import com.occw.occwinternetbanking.filter.JWTTokenGeneratorFilter;
+import com.occw.occwinternetbanking.filter.JWTTokenValidatorFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -54,11 +58,13 @@ public class ProjectSecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
 		CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-		http.securityContext().requireExplicitSave(false);
-		http.csrf().ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration"));
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+		.csrf().ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration"));
 		http.csrf((csrf) -> csrf
 			.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-		).addFilterAfter(new CsrfCookieFilter(),BasicAuthenticationFilter.class);
+		).addFilterAfter(new CsrfCookieFilter(),BasicAuthenticationFilter.class)
+		.addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+		.addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class);
 		
 		http.cors().configurationSource( new CorsConfigurationSource() {
 			@Override
@@ -68,6 +74,7 @@ public class ProjectSecurityConfig {
 				config.setAllowedMethods(Collections.singletonList("*"));
 				config.setAllowCredentials(true);
 				config.setAllowedHeaders(Collections.singletonList("*"));
+				config.setExposedHeaders(Arrays.asList("Authorization"));
 				config.setMaxAge(3600L);
 				return config;
 			}			
@@ -75,7 +82,8 @@ public class ProjectSecurityConfig {
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers(AntPathRequestMatcher.antMatcher("/occwp/*")).permitAll()
 				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/myAccount")).hasAuthority("VIEWACCOUNTS")
-				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration")).permitAll());
+				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/customerregistration")).permitAll()
+				.anyRequest().authenticated());
 		http.formLogin(withDefaults());
 		http.httpBasic(withDefaults());
 		return http.build();
